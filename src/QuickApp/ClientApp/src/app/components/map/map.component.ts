@@ -18,7 +18,7 @@ export class MapComponent implements OnInit{
   lng = 25.28;
   constructor() {
       
-    Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(environment.mapbox.accessToken);
+    Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set('pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA');
    
   }
 
@@ -309,7 +309,7 @@ this.map.addSource('Sim_Route_Routes', {
               
                 if(this.Sim_Route_Counter > 328000)
                 {
-                    window.clearInterval();
+                    //window.clearInterval();
                 }
                 this.Sim_Route_Point.features[0].geometry.coordinates = this.Sim_Route_Cordinates[this.Sim_Route_Counter];
                 if(this.Sim_Route_Counter % 4 ==0)  
