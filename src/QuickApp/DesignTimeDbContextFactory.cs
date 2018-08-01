@@ -30,7 +30,7 @@ namespace AssetManagement
 
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            builder.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"], b => b.MigrationsAssembly("QuickApp"));
+            builder.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"], b => b.MigrationsAssembly("MOI.AssetManagement"));
             builder.UseOpenIddict();
 
             return new ApplicationDbContext(builder.Options);

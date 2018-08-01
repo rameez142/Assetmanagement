@@ -17,7 +17,7 @@ export class NotificationEndpoint {
     {
       "id": 1,
       "header": "Patrol Car 1 ",
-      "body": "Engine Started",
+      "body": "Patrol Car 1-Engine Started In Corniche",
       "isRead": true,
       "isPinned": true,
       "date": "2017-05-30"
@@ -25,7 +25,7 @@ export class NotificationEndpoint {
     {
       "id": 2,
       "header": "Patrol Car 2",
-      "body": "Connection Lost Please Contact Driver",
+      "body": "Patrol Car 2-Connection Lost in wakra Please Contact Driver",
       "isRead": false,
       "isPinned": false,
       "date": "2017-05-30"
@@ -33,7 +33,7 @@ export class NotificationEndpoint {
     {
       "id": 3,
       "header": "Patrol Car 4",
-      "body": "Stopped At Location : 2225,6665",
+      "body": "atrol Car 4-Stopped At Location : 2225,6665",
       "isRead": false,
       "isPinned": false,
       "date": "2017-05-30"

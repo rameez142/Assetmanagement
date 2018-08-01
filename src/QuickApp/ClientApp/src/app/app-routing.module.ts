@@ -16,7 +16,7 @@ import { AboutComponent } from "./components/about/about.component";
 import { NotFoundComponent } from "./components/not-found/not-found.component";
 import { AuthService } from './services/auth.service';
 import { AuthGuard } from './services/auth-guard.service';
-
+import { MapComponent } from './components/map/map.component';
 
 const routes: Routes = [
   { path: "", component: HomeComponent, canActivate: [AuthGuard], data: { title: "Home" } },
@@ -26,6 +26,7 @@ const routes: Routes = [
   { path: "orders", component: OrdersComponent, canActivate: [AuthGuard], data: { title: "Orders" } },
   { path: "settings", component: SettingsComponent, canActivate: [AuthGuard], data: { title: "Settings" } },
   { path: "about", component: AboutComponent, data: { title: "About Us" } },
+  { path: "maptracking", component: MapComponent, canActivate: [AuthGuard],data: { title: "Tracking" } },
   { path: "home", redirectTo: "/", pathMatch: "full" },
   { path: "**", component: NotFoundComponent, data: { title: "Page Not Found" } }
 ];

@@ -22,6 +22,7 @@
             <li routerLinkActive="active" *ngIf="canViewProducts"><a routerLink="/products">{{'mainMenu.Products' | translate}}</a></li>
             <li routerLinkActive="active" *ngIf="canViewOrders"><a routerLink="/orders">{{'mainMenu.Orders' | translate}}</a></li>
             <li routerLinkActive="active"><a routerLink="/about">{{'mainMenu.About' | translate}}</a></li>
+            <li routerLinkActive="active"><a routerLink="/maptracking">Tracking</a></li>
           </ul>
           <ul class="app-component nav navbar-nav nav-pills navBarPadding navbar-right">
             <li (click)="logout()"><a href="javascript:;"><span class="glyphicon glyphicon-log-out"></span> {{'mainMenu.Logout' | translate}}</a></li>
@@ -63,10 +64,12 @@
         </p>
       </div>
     </div>
+
     <div id="mainContent" class="app-component">
-      <router-outlet></router-outlet>
-      <MOI-Map></MOI-Map>
+      <router-outlet></router-outlet>      
     </div>
+
+
     <div id="footer">
       <div class="app-component navbar-fixed-bottom navbar-inner footer">
         <div class="container">

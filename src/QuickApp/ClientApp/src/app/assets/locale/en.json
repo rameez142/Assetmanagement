@@ -14,9 +14,9 @@
   },
   "pageHeader": {
     "Dashboard": "Dashboard",
-    "Customers": "Customers",
-    "Products": "Products",
-    "Orders": "Orders",
+    "Customers": "Car Detail",
+    "Products": "Driver Detail",
+    "Orders": "Route History",
     "NotFound": "Not-Found",
     "About": "About",
     "Settings": "Settings"

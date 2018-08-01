@@ -1,7 +1,17 @@
-<div id='sidebar'>
-  <button (click)="onClickMe()">Click me!</button>
-  <button (click)="SimulateDevice()">Simulate Device</button>
-  <button (click)="Simulate_By_Route_Device()">Simulate Device By Route</button>&nbsp;
-  <input type="checkbox" />
+<div class="container">
+  <header class="pageHeader">
+    <h3><i class="fa fa-handshake-o fa-lg page-caption" aria-hidden="true"></i> Track Vehicle</h3>
+  </header>
+
+  <div [@fadeInOut]>
+    <!---- Sample Page Content ---->
+    <div id='sidebar'>
+      <button (click)="onClickMe()">Click me!</button>
+      <button (click)="SimulateDevice()">Simulate Device</button>
+      <button (click)="Simulate_By_Route_Device()">Simulate Device By Route</button>&nbsp;
+      <input type="checkbox" />
+    </div>
+    <div id='map' style="position:relative"></div>
+
+  </div>
 </div>
-<div id='map'></div>
