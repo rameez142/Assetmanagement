@@ -1,5 +1,5 @@
-import { Component, OnInit, NgZone } from '@angular/core';
 import { fadeInOut } from '../../services/animations';
+import { Component, OnInit, NgZone } from '@angular/core';
 
 import * as mapboxgl from 'mapbox-gl';
 import * as urf from '@turf/turf';
@@ -16,33 +16,75 @@ export interface MapImageOptions {
 
 @Component({
   selector: 'MOI-Map',
-  templateUrl: './map.component.html',  
+  templateUrl: './map.component.html',
   animations: [fadeInOut]
 })
+
 export class MapComponent implements OnInit {
 
   public map: mapboxgl.Map;
   public Sim_Point2: any;
-  style = 'mapbox://styles/mapbox/satellite-v9';
-  lat = 51.1839;
-  lng = 25.3548;
-  constructor() {
+  public Patrol_Point: any;
+  public Taxi_Point: any;
+  public layerList: any;
+  public inputs: any;
+  public layerId: string = 'satellite';
+  public filter: boolean;
+  public mapdiv = document.getElementById("map");
+  public cartxt = `
+  <table>
+      <tr>
+          <td>Vehicle Number</td>
+          <td>:</td>
+          <td>396783</td>
+      </tr>
+      <tr>
+          <td>Driver</td>
+          <td>:</td>
+          <td>Fazal</td>
+      </tr>
+      <tr>
+          <td>Speed</td>
+          <td>:</td>
+          <td>52 km/hr</td>
+      </tr>
+      <tr>
+          <td>Odometer</td>
+          <td>:</td>
+          <td>124587</td>
+      </tr>
+  </table>
+  `;
 
+  style = 'mapbox://styles/mapbox/' + this.layerId + '-v9';
+  lat = 51.50483256966692;
+  lng = 25.30113229823209;
+  constructor() {
+    this.filter = false;
     Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(environment.mapbox.accessToken);
+    mapboxgl.setRTLTextPlugin('https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.1.0/mapbox-gl-rtl-text.js', this.ChngLng);
 
   }
 
   ngOnInit() {
 
     this.initializeMap()
-    this.map.on('click', this.addMarker);
-    //this.map.on('contextmenu',this.addPopUp);
-    this.map.on('load', this.addPatrol);
-    this.map.on('load', this.addTaxi);
+
+    //this.map.on('load', this.addPatrol);
+    //this.map.on('load', this.addTaxi);
   }
 
   private initializeMap() {
-    /// locate the user  
+    /// locate the user
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        this.lat = position.coords.latitude;
+        this.lng = position.coords.longitude;
+        this.map.flyTo({
+          center: [this.lng, this.lat]
+        })
+      });
+    }
 
     this.buildMap()
 
@@ -53,7 +95,7 @@ export class MapComponent implements OnInit {
     this.map = new mapboxgl.Map({
       container: 'map',
       style: this.style,
-      zoom: 7,
+      zoom: 14,
       center: [this.lng, this.lat]
     });
     this.map.addControl(new mapboxgl.NavigationControl());
@@ -63,14 +105,86 @@ export class MapComponent implements OnInit {
           setTimeout(waiting, 200);
         } else {
           this.AddPoint();
+          this.addPatrol();
+          this.addTaxi();
+          if (this.layerId == 'streets') {
+            this.map.setLayoutProperty('country-label-lg', 'text-field', '{name_ar}');
+            this.map.setLayoutProperty('state-label-lg', 'text-field', '{name_ar}');
+            this.map.setLayoutProperty('place-city-lg-n', 'text-field', '{name_ar}');
+            this.map.setLayoutProperty('place-city-sm', 'text-field', '{name_ar}');
+            this.map.setLayoutProperty('place-city-sm', 'text-field', '{name_ar}');
+
+          }
+          this.map.on('mouseover', 'Sim_Point2', (e) => {
+            new mapboxgl.Popup({ closeButton: true })
+              .setLngLat(e.lngLat)
+              .setHTML(this.cartxt)
+              .addTo(this.map);
+          });
+          this.map.on('mouseover', 'Sim_Route_Point', (e) => {
+            new mapboxgl.Popup({ closeButton: true })
+              .setLngLat(e.lngLat)
+              .setHTML(this.cartxt)
+              .addTo(this.map);
+          });
+
+          this.map.on('mouseover', 'Sim_Point', (e) => {
+            new mapboxgl.Popup({ closeButton: true })
+              .setLngLat(e.lngLat)
+              .setHTML(this.cartxt)
+              .addTo(this.map);
+          });
+          this.map.on('click', this.addMarker);
+          this.map.on('contextmenu', this.addPopUp);
+          this.map.addControl(new mapboxgl.FullscreenControl(), 'top-left');
+
         }
+
       };
       waiting();
     });
-    // this.map.on('click', this.addMarker);
+
+
+
+  }
+
+  chngstyle(e) {
+    this.style = 'mapbox://styles/mapbox/' + e.target.id + '-v9';
+    window.clearInterval(this.Sim_Route_timer)
+    window.clearInterval(this.Sim_timer)
+    this.removealllayers();
+    this.map.remove();
+    this.initializeMap();
+  }
+
+
+  removealllayers() {
+
+    if (this.map.getSource('car') != undefined) {
+      this.map.removeSource('car')
+    }
+    if (this.map.getSource('car-2') != undefined) {
+      this.map.removeSource('car-2')
+    }
+    if (this.map.getSource('arrow') != undefined) {
+      this.map.removeSource('arrow')
+    }
+
+  }
+
+  ChngLng(): void {
+
   }
 
   AddPoint() {
+    if (this.map.getLayer('Sim_Point2') != undefined) {
+      this.map.removeLayer('Sim_Point2')
+    }
+
+    if (this.map.getSource('Sim_Point2') != undefined) {
+      this.map.removeSource('Sim_Point2')
+    }
+
     this.Sim_Point2 = {
       "type": "FeatureCollection",
       "features": [{
@@ -79,7 +193,6 @@ export class MapComponent implements OnInit {
         "geometry": {
           "type": "Point",
           "coordinates": [51.51530035085821, 25.304319728433242]
-
         }
       }]
     };
@@ -91,7 +204,7 @@ export class MapComponent implements OnInit {
       "type": "geojson",
       "data": this.Sim_Point2
     });
-    this.loadAndAddImage('car', '/assets/images/bluecar.png');
+    this.loadAndAddImage('car', 'assets/images/bluecar.png');
     this.map.addLayer({
       "id": "Sim_Point2",
       "source": "Sim_Point2",
@@ -129,10 +242,18 @@ export class MapComponent implements OnInit {
   }
 
 
+  onFilterChange(eve: any) {
+    this.filter = !this.filter;
+
+    console.log(this.filter);
+  }
+
+
   onClickMe() {
+
     var el = document.createElement('div');
     el.className = 'marker';
-    el.style.backgroundImage = 'url(/assets/images/flag.png)';
+    el.style.backgroundImage = 'url(assets/images/flag.png)';
     el.style.width = '50px';
     el.style.height = '50px';
     new mapboxgl.Marker(el)
@@ -140,35 +261,107 @@ export class MapComponent implements OnInit {
       .addTo(this.map);
   }
 
-  addPatrol(e) {
-    var el = document.createElement('div');
-    el.className = 'marker';
-    el.style.backgroundImage = 'url(/assets/images/policecar.png)';
-    el.style.width = '99px';
-    el.style.height = '70px';
-    new mapboxgl.Marker(el)
-      .setLngLat([51.50533677693306, 25.301188354640573])
-      .addTo(e.target);
+  addPatrol() {
+    // var el = document.createElement('div');
+    // el.className = 'marker';
+    // el.style.backgroundImage = 'url(assets/images/bluecar.png)';
+    // el.style.width = '38px';
+    // el.style.height = '46px';
+    // new mapboxgl.Marker(el)
+    // .setLngLat([51.50533677693306, 25.301188354640573])
+    // .addTo(this.map);
+    if (this.map.getLayer('Patrol_Point') != undefined) {
+      this.map.removeLayer('Patrol_Point')
+    }
+    if (this.map.getSource('Patrol_Point') != undefined) {
+      this.map.removeSource('Patrol_Point')
+    }
+
+    this.Patrol_Point = {
+      "type": "FeatureCollection",
+      "features": [{
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Point",
+          "coordinates": [51.50533677693306, 25.301188354640573]
+        }
+      }]
+    };
+    this.Patrol_Point.features[0].properties.bearing = urf.bearing(
+      urf.point([51.50533677693306, 25.301188354640573]),
+      urf.point([51.51508845633549, 25.30423320325528])
+    );
+    this.map.addSource('Patrol_Point', {
+      "type": "geojson",
+      "data": this.Patrol_Point
+    });
+    this.loadAndAddImage('car-2', 'assets/images/redcar.png');
+    this.map.addLayer({
+      "id": "Patrol_Point",
+      "source": "Patrol_Point",
+      "type": "symbol",
+      "layout": {
+        "icon-image": "car-2",
+        "icon-size": 0.8,
+        "icon-rotate": ["get", "bearing"],
+        "icon-rotation-alignment": "map",
+        "icon-allow-overlap": true
+      }
+    });
   }
 
-  addTaxi(e) {
-    var el = document.createElement('div');
-    el.className = 'marker';
-    el.style.backgroundImage = 'url(/assets/images/taxi.png)';
-    el.style.width = '77px';
-    el.style.height = '77px';
-    new mapboxgl.Marker(el)
-      .setLngLat([51.50397015130585, 25.30081649590916])
-      .addTo(e.target);
+  addTaxi() {
+    // var el = document.createElement('div');
+    // el.className = 'marker';
+    // el.style.backgroundImage = 'url(assets/images/taxi.png)';
+    // el.style.width = '77px';
+    // el.style.height = '77px';
+    // new mapboxgl.Marker(el)
+    // .setLngLat([51.50397015130585, 25.30081649590916])
+    // .addTo(e.target);
+
+    this.Taxi_Point = {
+      "type": "FeatureCollection",
+      "features": [{
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Point",
+          "coordinates": [51.50397015130585, 25.30081649590916]
+        }
+      }]
+    };
+    this.Taxi_Point.features[0].properties.bearing = urf.bearing(
+      urf.point([51.50397015130585, 25.30081649590916]),
+      urf.point([51.50351468112902, 25.300566255529247])
+    );
+    this.map.addSource('Taxi_Point', {
+      "type": "geojson",
+      "data": this.Taxi_Point
+    });
+    this.loadAndAddImage('car-3', 'assets/images/taxi2.png');
+    this.map.addLayer({
+      "id": "Taxi_Point",
+      "source": "Taxi_Point",
+      "type": "symbol",
+      "layout": {
+        "icon-image": "car-3",
+        "icon-size": 0.8,
+        "icon-rotate": ["get", "bearing"],
+        "icon-rotation-alignment": "map",
+        "icon-allow-overlap": true
+      }
+    });
   }
 
   addMarker(e) {
     //if()
-
+    //e.stopPropagation();
 
     var e1 = document.createElement('div');
     e1.className = 'marker';
-    e1.style.backgroundImage = 'url(/assets/images/flag.png)';
+    e1.style.backgroundImage = 'url(assets/images/flag.png)';
     e1.style.width = '62px';
     e1.style.height = '100px';
 
@@ -177,38 +370,39 @@ export class MapComponent implements OnInit {
         .setLngLat(e.lngLat)
         .setHTML(
           `
-            <table>
-                <tr>
-                    <td>Vehicle Number</td>
-                    <td>:</td>
-                    <td>396783</td>
-                </tr>
-                <tr>
-                    <td>Driver</td>
-                    <td>:</td>
-                    <td>Fazal</td>
-                </tr>
-                <tr>
-                    <td>Speed</td>
-                    <td>:</td>
-                    <td>52 km/hr</td>
-                </tr>
-                <tr>
-                    <td>Odometer</td>
-                    <td>:</td>
-                    <td>124587</td>
-                </tr>
-            </table>
-        `
+                <table>
+                    <tr>
+                        <td>Vehicle Number</td>
+                        <td>:</td>
+                        <td>396783</td>
+                    </tr>
+                    <tr>
+                        <td>Driver</td>
+                        <td>:</td>
+                        <td>Fazal</td>
+                    </tr>
+                    <tr>
+                        <td>Speed</td>
+                        <td>:</td>
+                        <td>52 km/hr</td>
+                    </tr>
+                    <tr>
+                        <td>Odometer</td>
+                        <td>:</td>
+                        <td>124587</td>
+                    </tr>
+                </table>
+            `
         )
         .addTo(e.target);
-      e.preventDefault();
       return false;
     });
 
     new mapboxgl.Marker(e1)
       .setLngLat(e.lngLat)
       .addTo(e.target)
+
+
   }
 
   addPopUp(e) {
@@ -250,13 +444,32 @@ export class MapComponent implements OnInit {
   Simulate_By_Route_Device(): void {
     this.map.flyTo({
       center: [51.514702218254286, 25.30427200090172],
-      zoom: 16
+      zoom: 17,
+      pitch: 60,
+      bearing: 70
     });
 
     this.Sim_Route_origin = [51.514702218254286, 25.30427200090172];
 
     // Washington DC
     this.Sim_Route_Destination = [51.50755469058109, 25.30204953583231];
+    if (this.map.getLayer('Sim_Route_turf_Point') != undefined) {
+      this.map.removeLayer('Sim_Route_turf_Point')
+    }
+
+    if (this.map.getSource('Sim_Route_turf_Point') != undefined) {
+      this.map.removeSource('Sim_Route_turf_Point')
+    }
+
+
+
+
+    if (this.map.getLayer('Sim_Route_Point') != undefined) {
+      this.map.removeLayer('Sim_Route_Point')
+    }
+    if (this.map.getSource('Sim_Route_Point') != undefined) {
+      this.map.removeSource('Sim_Route_Point')
+    }
 
     this.Sim_Route_Routes = {
       "type": "FeatureCollection",
@@ -349,21 +562,10 @@ export class MapComponent implements OnInit {
     this.Sim_Route_timer = window.setInterval(() => {
 
       if (this.Sim_Route_Counter > 328000) {
-        window.clearInterval(this.Sim_Route_timer);
+        // window.clearInterval();
       }
       this.Sim_Route_Point.features[0].geometry.coordinates = this.Sim_Route_Cordinates[this.Sim_Route_Counter];
-      if (this.Sim_Route_Counter % 4 == 0) {
 
-        var el = document.createElement('div');
-        el.className = 'marker';
-        el.style.backgroundImage = 'url(/assets/images/routemark.png)';
-        el.style.width = '5px';
-        el.style.height = '5px';
-        new mapboxgl.Marker(el)
-          .setLngLat(this.Sim_Route_Cordinates[this.Sim_Route_Counter])
-          .addTo(this.map);
-
-      }
 
       this.Sim_Route_Point.features[0].properties.bearing = urf.bearing(
         urf.point(this.Sim_Route_Cordinates[this.Sim_Route_Counter >= 500 ? this.Sim_Route_Counter - 1 : this.Sim_Route_Counter]),
@@ -372,7 +574,20 @@ export class MapComponent implements OnInit {
 
       var st: any = this.map.getSource('Sim_Route_Point')
       st.setData(this.Sim_Route_Point);
+      if (this.Sim_Route_Counter != 0) {
+        if (this.Sim_Route_Counter % 18 == 0) {
 
+          var el = document.createElement('div');
+          el.className = 'marker';
+          el.style.backgroundImage = 'url(assets/images/mark-arrow.png)';
+          el.style.width = '17px';
+          el.style.height = '18px';
+          new mapboxgl.Marker(el)
+            .setLngLat(this.Sim_Route_Cordinates[this.Sim_Route_Counter - 1])
+            .addTo(this.map);
+
+        }
+      }
       this.Sim_Route_Counter = this.Sim_Route_Counter + 1;
     }, 100);
   }
@@ -380,7 +595,9 @@ export class MapComponent implements OnInit {
   SimulateDevice(): void {
     this.map.flyTo({
       center: [51.51503213033115, 25.303961620211695],
-      zoom: 16
+      zoom: 17,
+      pitch: 60,
+      bearing: 70
     });
 
     this.Sim_origin = [51.51503213033115, 25.303961620211695];
@@ -389,7 +606,20 @@ export class MapComponent implements OnInit {
     this.Sim_Destination = [51.610, 25.267];
 
 
+    if (this.map.getLayer('Sim_Point') != undefined) {
+      this.map.removeLayer('Sim_Point')
+    }
+    if (this.map.getSource('Sim_Point') != undefined) {
+      this.map.removeSource('Sim_Point')
+    }
 
+    if (this.map.getLayer('Sim_turf_Point') != undefined) {
+      this.map.removeLayer('Sim_turf_Point')
+
+    }
+    if (this.map.getSource('Sim_turf_Point') != undefined) {
+      this.map.removeSource('Sim_turf_Point')
+    }
     this.Sim_Cordinates = [];
 
 
@@ -509,7 +739,7 @@ export class MapComponent implements OnInit {
     });
 
 
-
+    this.loadAndAddImage('arrow', 'assets/images/arrow.png');
 
     this.SimulateInterval()
 
@@ -539,6 +769,7 @@ export class MapComponent implements OnInit {
       sourcet.setData(this.Sim_Point);
 
       //this.map.getSource("Sim_Point")<GeoJSONSource.setData(this.Sim_Point);
+
       if (this.Sim_Counter == 0) {
         this.Sim_tuf_Point.features[0].geometry.coordinates = this.Sim_origin;
       }
@@ -557,7 +788,7 @@ export class MapComponent implements OnInit {
         "source": "Sim_tuf_Point".concat(this.rndm),
         "type": "symbol",
         "layout": {
-          "icon-image": "car-11",
+          "icon-image": "arrow",
           "icon-rotate": this.Sim_Point.features[0].properties.bearing,
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true
@@ -567,7 +798,8 @@ export class MapComponent implements OnInit {
 
 
       this.Sim_Counter = this.Sim_Counter + 1;
-    }, 5000);
+    }, 2000);
   }
   /* End of Simulation Code*/
 }
+
