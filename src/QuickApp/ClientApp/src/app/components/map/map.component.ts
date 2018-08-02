@@ -61,12 +61,12 @@ export class MapComponent implements OnInit {
 
   style = 'mapbox://styles/mapbox/' + this.layerId + '-v9';
 
-  lat = 51.523530493149366;
-  lng = 25.326776055072074;
+  lat = 51.51503213033115;
+  lng = 25.303961620211695;
   constructor() {
     this.filter = false;
     Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(environment.mapbox.accessToken);
-    mapboxgl.setRTLTextPlugin('assets/scripts/mapbox-gl-rtl-text.js',this.ChngLng);
+   mapboxgl.setRTLTextPlugin('assets/scripts/mapbox-gl-rtl-text.js',this.ChngLng);
    
     }
 
@@ -82,6 +82,7 @@ export class MapComponent implements OnInit {
   private initializeMap() {
     /// locate the user
     
+
     this.buildMap()
 
   }
@@ -91,9 +92,13 @@ export class MapComponent implements OnInit {
     this.map = new mapboxgl.Map({
       container: 'map',
       style: this.style,
-      zoom: 8,
+      zoom: 14,
       center: [this.lng, this.lat]
-    });    
+    });
+    this.map.flyTo({
+      center: [51.51503213033115, 25.303961620211695],
+      zoom: 13
+    });
     this.map.addControl(new mapboxgl.NavigationControl());
     this.map.on('style.load', () => {
       const waiting = () => {
@@ -440,7 +445,7 @@ export class MapComponent implements OnInit {
   Simulate_By_Route_Device(): void {
     this.map.flyTo({
       center: [51.514702218254286, 25.30427200090172],
-      zoom: 17
+      zoom: 14
     });
 
     this.Sim_Route_origin = [51.514702218254286, 25.30427200090172];
@@ -589,7 +594,7 @@ export class MapComponent implements OnInit {
   SimulateDevice(): void {
     this.map.flyTo({
       center: [51.51503213033115, 25.303961620211695],
-      zoom: 17
+      zoom: 14
     });
 
     this.Sim_origin = [51.51503213033115, 25.303961620211695];
