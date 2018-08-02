@@ -1,3 +1,4 @@
+
 import { fadeInOut } from '../../services/animations';
 import { Component, OnInit, NgZone } from '@angular/core';
 
@@ -6,6 +7,7 @@ import * as urf from '@turf/turf';
 import { environment } from '../../../environments/environment';
 import { AlertPromise } from '../../../../node_modules/@types/selenium-webdriver';
 import { GeoJSONSource } from 'mapbox-gl';
+import { url } from 'inspector';
 
 
 export type MapImageData = HTMLImageElement | ImageData | { width: number, height: number, data: Uint8Array | Uint8ClampedArray };
@@ -17,6 +19,7 @@ export interface MapImageOptions {
 @Component({
   selector: 'MOI-Map',
   templateUrl: './map.component.html',
+  styleUrls:['./map.component.css'],
   animations: [fadeInOut]
 })
 
@@ -57,16 +60,18 @@ export class MapComponent implements OnInit {
   `;
 
   style = 'mapbox://styles/mapbox/' + this.layerId + '-v9';
-  lat = 51.50483256966692;
-  lng = 25.30113229823209;
+
+  lat = 51.523530493149366;
+  lng = 25.326776055072074;
   constructor() {
     this.filter = false;
     Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(environment.mapbox.accessToken);
-    mapboxgl.setRTLTextPlugin('https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.1.0/mapbox-gl-rtl-text.js', this.ChngLng);
-
-  }
+    mapboxgl.setRTLTextPlugin('assets/scripts/mapbox-gl-rtl-text.js',this.ChngLng);
+   
+    }
 
   ngOnInit() {
+    
 
     this.initializeMap()
 
@@ -76,16 +81,7 @@ export class MapComponent implements OnInit {
 
   private initializeMap() {
     /// locate the user
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
-        this.lat = position.coords.latitude;
-        this.lng = position.coords.longitude;
-        this.map.flyTo({
-          center: [this.lng, this.lat]
-        })
-      });
-    }
-
+    
     this.buildMap()
 
   }
@@ -95,9 +91,9 @@ export class MapComponent implements OnInit {
     this.map = new mapboxgl.Map({
       container: 'map',
       style: this.style,
-      zoom: 14,
+      zoom: 8,
       center: [this.lng, this.lat]
-    });
+    });    
     this.map.addControl(new mapboxgl.NavigationControl());
     this.map.on('style.load', () => {
       const waiting = () => {
@@ -444,9 +440,7 @@ export class MapComponent implements OnInit {
   Simulate_By_Route_Device(): void {
     this.map.flyTo({
       center: [51.514702218254286, 25.30427200090172],
-      zoom: 17,
-      pitch: 60,
-      bearing: 70
+      zoom: 17
     });
 
     this.Sim_Route_origin = [51.514702218254286, 25.30427200090172];
@@ -595,9 +589,7 @@ export class MapComponent implements OnInit {
   SimulateDevice(): void {
     this.map.flyTo({
       center: [51.51503213033115, 25.303961620211695],
-      zoom: 17,
-      pitch: 60,
-      bearing: 70
+      zoom: 17
     });
 
     this.Sim_origin = [51.51503213033115, 25.303961620211695];

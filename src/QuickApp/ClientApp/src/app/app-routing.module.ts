@@ -26,7 +26,7 @@ const routes: Routes = [
   { path: "orders", component: OrdersComponent, canActivate: [AuthGuard], data: { title: "Orders" } },
   { path: "settings", component: SettingsComponent, canActivate: [AuthGuard], data: { title: "Settings" } },
   { path: "about", component: AboutComponent, data: { title: "About Us" } },
-  { path: "maptracking", component: MapComponent, canActivate: [AuthGuard],data: { title: "Tracking" } },
+  { path: "maptracking", component: MapComponent, data: { title: "Tracking" } },
   { path: "home", redirectTo: "/", pathMatch: "full" },
   { path: "**", component: NotFoundComponent, data: { title: "Page Not Found" } }
 ];
