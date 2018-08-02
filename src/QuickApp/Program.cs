@@ -21,6 +21,7 @@ namespace AssetManagement
     {
         public static void Main(string[] args)
         {
+            //IMran
             var host = CreateWebHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope())
