@@ -27,6 +27,7 @@ export class MapComponent implements OnInit {
 
   public map: mapboxgl.Map;
   public Sim_Point2: any;
+  public Sim_Point3: any;
   public Patrol_Point: any;
   public Taxi_Point: any;
   public layerList: any;
